@@ -13,7 +13,7 @@ def isSafe(x):
 import requests
 
 cookies = {}
-cookies['session'] = '53616c7465645f5fd289b22cc7e55adb9976b44c511ae63ba61eb120770a16fd739005f66f774400f572b7bc95a57a10f7e96ad761262822136398cbe5f897f1'
+cookies['session'] = 'MINDYOURBUISNESS'
 
 puzzle_year = '2024'
 puzzle_day = '2'

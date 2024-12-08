@@ -30,97 +30,106 @@ def move(position, direction):
     else:
         return (position[0], position[1]+1)
 
-def is_there_obstacle(position, direction, labyrinth):
-    i = 1
-    if direction == '^':
-        while 0 <= position[0] < len(labyrinth) and 0 <= position[1] < len(labyrinth[0]):
-            if labyrinth[position[0]-i][position[1]] == '#':
-                return (True, (position[0]-i+1, position[1]))
-            i += 1
-        return (False, (position[0]-i+1, position[1]))
-    elif direction == '<':
-        while 0 <= position[0] < len(labyrinth) and 0 <= position[1] < len(labyrinth[0]):
-            if labyrinth[position[0]][position[1]-i] == '#':
-                return (True, (position[0], position[1]-i+1))
-            i += 1
-        return (False, (position[0], position[1]-i+1))
-    elif direction == 'v':
-        while 0 <= position[0] < len(labyrinth) and 0 <= position[1] < len(labyrinth[0]):
-            if labyrinth[position[0]+i][position[1]] == '#':
-                return (True, (position[0]+i-1, position[1]))
-            i += 1
-        return (False, (position[0]+i-1, position[1]))
-    else:
-        while 0 <= position[0] < len(labyrinth) and 0 <= position[1] < len(labyrinth[0]):
-            if labyrinth[position[0]][position[1]+i] == '#':
-                return (True, (position[0], position[1]+i-1))
-            i += 1
-        return (False, (position[0], position[1]+i-1))
-
-def is_back_to_intial(position, direction, labyrinth, initial):
-    i = 1
-    if direction == '^':
-        while 0 <= position[0] < len(labyrinth) and 0 <= position[1] < len(labyrinth[0]):
-            if labyrinth[position[0]-i][position[1]] == '#':
-                return False
-            elif position[0] - i == initial[0] and position[1] == initial[1]:
-                return True
-            i += 1
-        return False
-    elif direction == '<':
-        while 0 <= position[0] < len(labyrinth) and 0 <= position[1] < len(labyrinth[0]):
-            if labyrinth[position[0]][position[1]-i] == '#':
-                return False
-            elif position[0] == initial[0] and position[1]-i == initial[1]:
-                return True
-            i += 1
-        return False
-    elif direction == 'v':
-        while 0 <= position[0] < len(labyrinth) and 0 <= position[1] < len(labyrinth[0]):
-            if labyrinth[position[0]+i][position[1]] == '#':
-                return False
-            elif position[0] + i == initial[0] and position[1] == initial[1]:
-                return True
-            i += 1
-        return False
-    else:
-        while 0 <= position[0] < len(labyrinth) and 0 <= position[1] < len(labyrinth[0]):
-            if labyrinth[position[0]][position[1]+i] == '#':
-                return False
-            elif position[0] == initial[0] and position[1] + i == initial[1]:
-                return True
-            i += 1
-        return False
-
-def is_rectangle_possible(position, direction, labyrinth):
-    initial = position
-    value = []
-    while 0 <= position[0] < len(labyrinth) and 0 <= position[1] < len(labyrinth[0]):
-        try:
-            value = is_there_obstacle(position, direction, labyrinth)
-            position = value[1]
-            direction = rotate(direction)
-            if(value[0]):
-                if(is_back_to_intial(position, direction, labyrinth, initial) and is_there_obstacle(position, direction, labyrinth)[0]):
-                    return True
-        except:
-            break
+def isObstruction(labyrinth, obstaclePositionsRow, obstaclePositionsColone, position, direction):
+    initialPosition = position
+    # initialDirection = direction
     
+    if direction == '^':
+            value = obstaclePositionsRow.get(position[0] - 1, [])
+            obstaclePositionsRow[position[0] - 1] = value + [position[1]]
+
+            value = obstaclePositionsColone.get(position[1], [])
+            obstaclePositionsColone[position[1]] = value + [position[0] - 1]
+
+    elif direction == '<':
+            value = obstaclePositionsRow.get(position[0], [])
+            obstaclePositionsRow[position[0]] = value + [position[1] - 1]
+
+            value = obstaclePositionsColone.get(position[1] - 1, [])
+            obstaclePositionsColone[position[1] - 1] = value + [position[0]]
+
+    elif direction == '>':
+            value = obstaclePositionsRow.get(position[0], [])
+            obstaclePositionsRow[position[0]] = value + [position[1] + 1]
+
+            value = obstaclePositionsColone.get(position[1] + 1, [])
+            obstaclePositionsColone[position[1] + 1] = value + [position[0]]
+
+    else:
+            value = obstaclePositionsRow.get(position[0] + 1, [])
+            obstaclePositionsRow[position[0] + 1] = value + [position[1]]
+
+            value = obstaclePositionsColone.get(position[1], [])
+            obstaclePositionsColone[position[1]] = value + [position[0] + 1]
+
+    while 0 <= position[0] < (len(labyrinth) - 1) and 0 <= position[1] < (len(labyrinth[0]) - 1):
+        if direction == '^':
+            rowObstacles = obstaclePositionsColone[position[1]]
+            distance = 1000000
+            for rowObstacle in rowObstacles:
+                if(distance < 0):
+                    distance = min(distance, rowObstacle - position[0])
+            
+            position = (position[0] + distance + 1, position[1])
+
+        elif direction == '<':
+            coloneObstacles = obstaclePositionsRow[position[0]]
+            distance = 1000000
+            for coloneObstacle in coloneObstacles:
+                if(distance < 0):
+                    distance = min(distance, coloneObstacle - position[1])
+            
+            position = (position[0], position[1] + distance + 1)
+        elif direction == '>':
+            coloneObstacles = obstaclePositionsRow[position[0]]
+            distance = 1000000
+            for coloneObstacle in coloneObstacles:
+                if(distance > 0):
+                    distance = min(distance, coloneObstacle - position[1])
+            
+            position = (position[0], position[1] + distance - 1)
+
+        else:
+            rowObstacles = obstaclePositionsColone[position[1]]
+            distance = 1000000
+            for rowObstacle in rowObstacles:
+                if(distance > 0):
+                    distance = min(distance, rowObstacle - position[0])
+            
+            position = (position[0] + distance - 1, position[1])
+
+        direction = rotate(direction)
+
+        if(position == initialPosition):
+            return True
+
     return False
 
+
 cookies = {}
-cookies['session'] = '53616c7465645f5fd289b22cc7e55adb9976b44c511ae63ba61eb120770a16fd739005f66f774400f572b7bc95a57a10f7e96ad761262822136398cbe5f897f1'
+cookies['session'] = '53616c7465645f5f2e0526ba5e5de2eb1dbe3689785a93e8555dc7247aa39344df8aad0931492841d4573b34bf54fbfaa35d99ef6af4d4a4ab5b54175694088e'
 
 puzzle_year = '2024'
 puzzle_day = '6'
 puzzle_input_url = f'https://adventofcode.com/{puzzle_year}/day/{puzzle_day}/input'
 
 req = requests.get(puzzle_input_url, cookies=cookies)
-raw_puzzle_input = req.text
+raw_puzzle_input = '''....#.....
+.........#
+..........
+..#.......
+.......#..
+..........
+.#..^.....
+........#.
+#.........
+......#...'''
 
 direction = '^'
 visited = {1}
 obstacles = {1}
+obstaclePositionsRow = {}
+obstaclePositionsColone = {}
 position = ()
 labyrinth = []
 row = 0
@@ -132,6 +141,13 @@ for line in raw_puzzle_input.splitlines():
             direction = char
             position = (row, colone)
             visited.add(position)
+        elif char == '#':
+            value = obstaclePositionsRow.get(row, [])
+            obstaclePositionsRow[row] = value + [colone]
+
+            value = obstaclePositionsColone.get(colone, [])
+            obstaclePositionsColone[colone] = value + [row]
+
         chars.append(char)
         colone += 1
     labyrinth.append(chars)
@@ -141,8 +157,7 @@ infiniteLoop = 0
 
 while 0 <= position[0] < len(labyrinth) and 0 <= position[1] < len(labyrinth[0]):
     try:
-        if(is_rectangle_possible(position, direction, labyrinth) or is_rectangle_possible(position, rotate(direction), labyrinth)):
-            print("here")
+        if(isObstruction(labyrinth, obstaclePositionsRow.copy(), obstaclePositionsColone.copy(), position, direction)):
             obstacles.add(position)
 
         if(is_able_to_move(position, direction, labyrinth)):
@@ -155,5 +170,5 @@ while 0 <= position[0] < len(labyrinth) and 0 <= position[1] < len(labyrinth[0])
         break
 
 print(len(visited)-1)
-# print(obstacles)
+print(obstacles)
 print(len(obstacles)-1)
