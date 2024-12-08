@@ -61,48 +61,51 @@ def isObstruction(labyrinth, obstaclePositionsRow, obstaclePositionsColone, posi
 
             value = obstaclePositionsColone.get(position[1], [])
             obstaclePositionsColone[position[1]] = value + [position[0] + 1]
+    
+    direction = rotate(direction)
+    initialDirection = direction
 
     while 0 <= position[0] < (len(labyrinth) - 1) and 0 <= position[1] < (len(labyrinth[0]) - 1):
         if direction == '^':
-            rowObstacles = obstaclePositionsColone[position[1]]
-            distance = 1000000
+            rowObstacles = obstaclePositionsColone.get(position[1], [])
+            distance = -1000000
             for rowObstacle in rowObstacles:
-                if(distance < 0):
-                    distance = min(distance, rowObstacle - position[0])
+                if(rowObstacle - position[0] < 0):
+                    distance = max(distance, rowObstacle - position[0])
             
             position = (position[0] + distance + 1, position[1])
 
         elif direction == '<':
-            coloneObstacles = obstaclePositionsRow[position[0]]
-            distance = 1000000
+            coloneObstacles = obstaclePositionsRow.get(position[0], [])
+            distance = -1000000
             for coloneObstacle in coloneObstacles:
-                if(distance < 0):
-                    distance = min(distance, coloneObstacle - position[1])
+                if(coloneObstacle - position[1] < 0):
+                    distance = max(distance, coloneObstacle - position[1])
             
             position = (position[0], position[1] + distance + 1)
         elif direction == '>':
-            coloneObstacles = obstaclePositionsRow[position[0]]
+            coloneObstacles = obstaclePositionsRow.get(position[0], [])
             distance = 1000000
             for coloneObstacle in coloneObstacles:
-                if(distance > 0):
+                if(coloneObstacle - position[1] > 0):
                     distance = min(distance, coloneObstacle - position[1])
             
             position = (position[0], position[1] + distance - 1)
 
         else:
-            rowObstacles = obstaclePositionsColone[position[1]]
+            rowObstacles = obstaclePositionsColone.get(position[1], [])
             distance = 1000000
             for rowObstacle in rowObstacles:
-                if(distance > 0):
+                if(rowObstacle - position[0] > 0):
                     distance = min(distance, rowObstacle - position[0])
             
             position = (position[0] + distance - 1, position[1])
 
         direction = rotate(direction)
-
-        if(position == initialPosition):
+            
+        if(position == initialPosition and initialDirection == direction):
             return True
-
+        
     return False
 
 
@@ -114,16 +117,7 @@ puzzle_day = '6'
 puzzle_input_url = f'https://adventofcode.com/{puzzle_year}/day/{puzzle_day}/input'
 
 req = requests.get(puzzle_input_url, cookies=cookies)
-raw_puzzle_input = '''....#.....
-.........#
-..........
-..#.......
-.......#..
-..........
-.#..^.....
-........#.
-#.........
-......#...'''
+raw_puzzle_input = req.text
 
 direction = '^'
 visited = {1}
@@ -157,6 +151,7 @@ infiniteLoop = 0
 
 while 0 <= position[0] < len(labyrinth) and 0 <= position[1] < len(labyrinth[0]):
     try:
+
         if(isObstruction(labyrinth, obstaclePositionsRow.copy(), obstaclePositionsColone.copy(), position, direction)):
             obstacles.add(position)
 
@@ -166,9 +161,8 @@ while 0 <= position[0] < len(labyrinth) and 0 <= position[1] < len(labyrinth[0])
                 visited.add(position)
         else:
             direction = rotate(direction)
-    except:
+    except Exception as e:
         break
 
 print(len(visited)-1)
-print(obstacles)
 print(len(obstacles)-1)
