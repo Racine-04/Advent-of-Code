@@ -1,5 +1,8 @@
 import requests
 
+first = ()
+obstacles = {1}
+
 def rotate(direction):
     if direction == '^':
         return '>'
@@ -31,44 +34,54 @@ def move(position, direction):
         return (position[0], position[1]+1)
 
 def isObstruction(labyrinth, obstaclePositionsRow, obstaclePositionsColone, position, direction):
-    cycle = {-1}
-    initialPosition = position
-    # initialDirection = direction
+    cycle = {first}
+    obstaclePosition = ()
+    #Add new obstacle
+    try:
+        if direction == '^':
+            newRow = position[0] - 1
+            if(0 <= newRow < len(labyrinth) and labyrinth[newRow][position[1]] == "."):
+                value = obstaclePositionsRow.get(newRow, [])
+                obstaclePositionsRow[newRow] = value + [position[1]]
+
+                value = obstaclePositionsColone.get(position[1], [])
+                obstaclePositionsColone[position[1]] = value + [newRow]
+                    
+                obstaclePosition = (newRow, position[1])
+        elif direction == '<':
+            newColone = position[1] - 1
+            if(0 <= newColone < len(labyrinth[0]) and labyrinth[position[0]][newColone] == "."):
+                value = obstaclePositionsRow.get(position[0], [])
+                obstaclePositionsRow[position[0]] = value + [newColone]
+
+                value = obstaclePositionsColone.get(newColone, [])
+                obstaclePositionsColone[newColone] = value + [position[0]]
+                
+                obstaclePosition = (position[0], newColone)
+        elif direction == '>':
+            newColone = position[1] + 1
+            if(0 <= newColone < len(labyrinth[0]) and labyrinth[position[0]][newColone] == "."):
+                value = obstaclePositionsRow.get(position[0], [])
+                obstaclePositionsRow[position[0]] = value + [newColone]
+
+                value = obstaclePositionsColone.get(newColone, [])
+                obstaclePositionsColone[newColone] = value + [position[0]]
+
+                obstaclePosition = (position[0], newColone)
+        else:
+            newRow = position[0] + 1
+            if(0 <= newRow < len(labyrinth) and labyrinth[newRow][position[1]] == "."):
+                value = obstaclePositionsRow.get(newRow, [])
+                obstaclePositionsRow[newRow] = value + [position[1]]
+
+                value = obstaclePositionsColone.get(position[1], [])
+                obstaclePositionsColone[position[1]] = value + [newRow]
+                obstaclePosition = (newRow, position[1])
+    except:
+        pass
     
-    if direction == '^':
-            value = obstaclePositionsRow.get(position[0] - 1, [])
-            obstaclePositionsRow[position[0] - 1] = value + [position[1]]
-
-            value = obstaclePositionsColone.get(position[1], [])
-            obstaclePositionsColone[position[1]] = value + [position[0] - 1]
-
-    elif direction == '<':
-            value = obstaclePositionsRow.get(position[0], [])
-            obstaclePositionsRow[position[0]] = value + [position[1] - 1]
-
-            value = obstaclePositionsColone.get(position[1] - 1, [])
-            obstaclePositionsColone[position[1] - 1] = value + [position[0]]
-
-    elif direction == '>':
-            value = obstaclePositionsRow.get(position[0], [])
-            obstaclePositionsRow[position[0]] = value + [position[1] + 1]
-
-            value = obstaclePositionsColone.get(position[1] + 1, [])
-            obstaclePositionsColone[position[1] + 1] = value + [position[0]]
-
-    else:
-            value = obstaclePositionsRow.get(position[0] + 1, [])
-            obstaclePositionsRow[position[0] + 1] = value + [position[1]]
-
-            value = obstaclePositionsColone.get(position[1], [])
-            obstaclePositionsColone[position[1]] = value + [position[0] + 1]
-    
-    direction = rotate(direction)
-    initialDirection = direction
-
-    cycle.add((initialPosition, initialDirection))
-
-    i = 100
+    position = first[0]
+    direction = first[1]
     while 0 <= position[0] < (len(labyrinth) - 1) and 0 <= position[1] < (len(labyrinth[0]) - 1):
         if direction == '^':
             rowObstacles = obstaclePositionsColone.get(position[1], [])
@@ -109,15 +122,14 @@ def isObstruction(labyrinth, obstaclePositionsRow, obstaclePositionsColone, posi
         status = ((position, direction))
 
         if(status in cycle):
-            return True
-        
-        cycle.add(status)
+            obstacles.add(obstaclePosition)
+            break
 
-    return False
+        cycle.add(status)
 
 
 cookies = {}
-cookies['session'] = '53616c7465645f5fd289b22cc7e55adb9976b44c511ae63ba61eb120770a16fd739005f66f774400f572b7bc95a57a10f7e96ad761262822136398cbe5f897f1'
+cookies['session'] = 'MINDYOURBUISNESS'
 
 puzzle_year = '2024'
 puzzle_day = '6'
@@ -128,7 +140,6 @@ raw_puzzle_input =  req.text
 
 direction = '^'
 visited = {1}
-obstacles = {1}
 obstaclePositionsRow = {}
 obstaclePositionsColone = {}
 position = ()
@@ -141,6 +152,7 @@ for line in raw_puzzle_input.splitlines():
         if char == '^' or char == '<' or char == 'v' or char == '>':
             direction = char
             position = (row, colone)
+            first = (position, direction)
             visited.add(position)
         elif char == '#':
             value = obstaclePositionsRow.get(row, [])
@@ -156,13 +168,10 @@ for line in raw_puzzle_input.splitlines():
 
 infiniteLoop = 0
 
-lol = position
-
 while 0 <= position[0] < len(labyrinth) and 0 <= position[1] < len(labyrinth[0]):
     try:
 
-        if(isObstruction(labyrinth, obstaclePositionsRow.copy(), obstaclePositionsColone.copy(), position, direction)):
-            obstacles.add(position)
+        isObstruction(labyrinth, obstaclePositionsRow.copy(), obstaclePositionsColone.copy(), position, direction)
 
         if(is_able_to_move(position, direction, labyrinth)):
             position = move(position, direction)
