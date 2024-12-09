@@ -31,6 +31,7 @@ def move(position, direction):
         return (position[0], position[1]+1)
 
 def isObstruction(labyrinth, obstaclePositionsRow, obstaclePositionsColone, position, direction):
+    cycle = {-1}
     initialPosition = position
     # initialDirection = direction
     
@@ -64,6 +65,8 @@ def isObstruction(labyrinth, obstaclePositionsRow, obstaclePositionsColone, posi
     
     direction = rotate(direction)
     initialDirection = direction
+
+    cycle.add((initialPosition, initialDirection))
 
     i = 100
     while 0 <= position[0] < (len(labyrinth) - 1) and 0 <= position[1] < (len(labyrinth[0]) - 1):
@@ -103,25 +106,25 @@ def isObstruction(labyrinth, obstaclePositionsRow, obstaclePositionsColone, posi
             position = (position[0] + distance - 1, position[1])
 
         direction = rotate(direction)
-            
-        if(position == initialPosition and initialDirection == direction):
+        status = ((position, direction))
+
+        if(status in cycle):
             return True
+        
+        cycle.add(status)
 
     return False
 
 
 cookies = {}
-cookies['session'] = '53616c7465645f5f2e0526ba5e5de2eb1dbe3689785a93e8555dc7247aa39344df8aad0931492841d4573b34bf54fbfaa35d99ef6af4d4a4ab5b54175694088e'
+cookies['session'] = '53616c7465645f5fd289b22cc7e55adb9976b44c511ae63ba61eb120770a16fd739005f66f774400f572b7bc95a57a10f7e96ad761262822136398cbe5f897f1'
 
 puzzle_year = '2024'
 puzzle_day = '6'
 puzzle_input_url = f'https://adventofcode.com/{puzzle_year}/day/{puzzle_day}/input'
 
 req = requests.get(puzzle_input_url, cookies=cookies)
-raw_puzzle_input =  '''...#..
-.....#
-.^#...
-....#.'''
+raw_puzzle_input =  req.text
 
 direction = '^'
 visited = {1}
@@ -171,5 +174,4 @@ while 0 <= position[0] < len(labyrinth) and 0 <= position[1] < len(labyrinth[0])
         break
 
 print(len(visited)-1)
-print(obstacles)
 print(len(obstacles)-1)
