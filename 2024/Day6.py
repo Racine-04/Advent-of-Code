@@ -65,6 +65,7 @@ def isObstruction(labyrinth, obstaclePositionsRow, obstaclePositionsColone, posi
     direction = rotate(direction)
     initialDirection = direction
 
+    i = 100
     while 0 <= position[0] < (len(labyrinth) - 1) and 0 <= position[1] < (len(labyrinth[0]) - 1):
         if direction == '^':
             rowObstacles = obstaclePositionsColone.get(position[1], [])
@@ -105,7 +106,7 @@ def isObstruction(labyrinth, obstaclePositionsRow, obstaclePositionsColone, posi
             
         if(position == initialPosition and initialDirection == direction):
             return True
-        
+
     return False
 
 
@@ -117,7 +118,10 @@ puzzle_day = '6'
 puzzle_input_url = f'https://adventofcode.com/{puzzle_year}/day/{puzzle_day}/input'
 
 req = requests.get(puzzle_input_url, cookies=cookies)
-raw_puzzle_input = req.text
+raw_puzzle_input =  '''...#..
+.....#
+.^#...
+....#.'''
 
 direction = '^'
 visited = {1}
@@ -149,6 +153,8 @@ for line in raw_puzzle_input.splitlines():
 
 infiniteLoop = 0
 
+lol = position
+
 while 0 <= position[0] < len(labyrinth) and 0 <= position[1] < len(labyrinth[0]):
     try:
 
@@ -165,4 +171,5 @@ while 0 <= position[0] < len(labyrinth) and 0 <= position[1] < len(labyrinth[0])
         break
 
 print(len(visited)-1)
+print(obstacles)
 print(len(obstacles)-1)
