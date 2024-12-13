@@ -1,15 +1,24 @@
 # import requests
+tracker = {-1}
 
 def blink(stringNum):
     newArray = []
     if(stringNum == '0'):
-        newArray.append('1')
+        num = '1'
+        tracker.add(num)
+        newArray.append(num)
     elif len(stringNum) % 2 == 0:
         half = len(stringNum) // 2
-        newArray.append(str(int(stringNum[:half])))
-        newArray.append(str(int(stringNum[half:])))
+        num1 = str(int(stringNum[:half]))
+        num2 = str(int(stringNum[:half]))
+        tracker.add(num1)
+        tracker.add(num2)
+        newArray.append(num1)
+        newArray.append(num2)
     else:
-        newArray.append(str(int(stringNum)*2024))
+        num = str(int(stringNum)*2024)
+        tracker.add(num)
+        newArray.append(num)
     
     return newArray
     
@@ -30,14 +39,31 @@ previousSize = 1
 
 i = 75
 while i > 0:
-    
     temp = []
+    
+    # Get max count
+    maximum = 1
+    for key in cache.keys():
+        if key in tracker:
+            size = len(cache[key])
+            if(size <= i):
+                maximum = max(maximum, size)
+
     for num in nums:
-        
-        value = blink(num)
-        temp += value
+        value = cache.get(num, blink(num))
+        cache[num] = value
+        while len(value) < maximum + 1:
+            arr = []
+            maxCalculated = value[len(value)-1]
+
+            for numbers in maxCalculated:
+                arr += blink(numbers)
+
+            cache[num] += arr
+
+        temp += cache[num][len(value)-1]
     nums = temp
     
-    i -= 1
+    i -= maximum
 
 print(len(nums))
